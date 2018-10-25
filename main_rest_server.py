@@ -22,18 +22,21 @@ def help_page():
 
 @app.route("/devices/<int:room>")
 def get_devices(room):
-    conn = sqlite3.connect('iot.db')
-    c = conn.cursor()
-
-    devices_iterator = c.execute("SELECT name FROM devices WHERE room="+str(int(room)))
-
-    if devices_iterator == None :
-        return "unknown room"
+    if room == 0 :
+        return ""
     else :
-        r = next(devices_iterator)[0]
-        for row in devices_iterator:
-            r += "," + row[0]
-        return r
+        conn = sqlite3.connect('iot.db')
+        c = conn.cursor()
+
+        devices_iterator = c.execute("SELECT name FROM devices WHERE room="+str(int(room)))
+
+        if devices_iterator == None :
+            return "unknown room"
+        else :
+            r = next(devices_iterator)[0]
+            for row in devices_iterator:
+                r += "," + row[0]
+            return r
 
 @app.route("/actions/<name>")
 def get_actions(name):
