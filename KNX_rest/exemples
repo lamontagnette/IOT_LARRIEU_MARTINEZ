@@ -1,0 +1,4 @@
+python3 main.py -ip "127.1.0.3" -pcli 3672 -pgate 3671 -floor 4 -bloc 2 -data 128 -a blind_control
+python3 main.py -ip "127.1.0.0" -pcli 3672 -pgate 3671 -floor 4 -bloc 1 -a blind_open
+python3 main.py -ip "127.1.0.0" -pcli 3672 -pgate 3671 -floor 4 -bloc 1 -a blind_close
+python3 main.py -ip "127.1.0.3" -pcli 3672 -pgate 3671 -floor 4 -bloc 2 -data 128 -a valve_control
