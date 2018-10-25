@@ -94,5 +94,4 @@ class ActionsActivity : AppCompatActivity(){
             true
         } else super.onKeyDown(keyCode, event)
     }
-
 }
