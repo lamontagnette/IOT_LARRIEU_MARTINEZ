@@ -1,5 +1,6 @@
 from flask import Flask
 import sqlite3
+import requests
 
 ip_knx_server = "127.0.0.1"
 port_knx_server = 5000
@@ -49,6 +50,24 @@ def get_actions(name):
         return "device not found"
     else :
         return actions[device_type]
+
+@app.route("/<string:name>/<string:action>")
+def action(name,action):
+    conn = sqlite3.connect('iot.db')
+    c = conn.cursor()
+
+    techno = next(c.execute('SELECT techno FROM devices WHERE name="'+name+'"'))[0]
+
+    if techno == "knx":
+        knx_info = next(c.execute('SELECT ip,floor,bloc FROM devices WHERE name="'+name+'"'))[0]
+
+        req = requests.get(ip_knx_server+"/"+knx_info[0]+"/"+str(knx_info[1])+"/"+str(knx_info[2])+"/"+action)
+
+        return "RETURN : " + req.text
+    elif techno == "zwave":
+        return "zwave"
+    else :
+        return "error"
 
 
 if __name__ == "__main__":
