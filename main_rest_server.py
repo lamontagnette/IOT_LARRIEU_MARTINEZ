@@ -18,10 +18,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def help_page():
-    return """HELP
-USE REST STYLE :
-/ip/floor/bloc/action(/data)
-"""
+    return """OK"""
 
 @app.route("/devices/<int:room>")
 def get_devices(room):
@@ -59,9 +56,27 @@ def action(name,action):
     techno = next(c.execute('SELECT techno FROM devices WHERE name="'+name+'"'))[0]
 
     if techno == "knx":
-        knx_info = next(c.execute('SELECT ip,floor,bloc FROM devices WHERE name="'+name+'"'))[0]
+        knx_info = next(c.execute('SELECT ip,floor,bloc FROM knx WHERE name="'+name+'"'))
 
-        req = requests.get(ip_knx_server+"/"+knx_info[0]+"/"+str(knx_info[1])+"/"+str(knx_info[2])+"/"+action)
+        req = requests.get("http://"+ip_knx_server+":5000/"+knx_info[0]+"/"+str(knx_info[1])+"/"+str(knx_info[2])+"/"+action)
+
+        return "RETURN : " + req.text
+    elif techno == "zwave":
+        return "zwave"
+    else :
+        return "error"
+
+@app.route("/<string:name>/<string:action>/<data>")
+def action_data(name,action,data):
+    conn = sqlite3.connect('iot.db')
+    c = conn.cursor()
+
+    techno = next(c.execute('SELECT techno FROM devices WHERE name="'+name+'"'))[0]
+
+    if techno == "knx":
+        knx_info = next(c.execute('SELECT ip,floor,bloc FROM knx WHERE name="'+name+'"'))
+
+        req = requests.get("http://"+ip_knx_server+":5000/"+knx_info[0]+"/"+str(knx_info[1])+"/"+str(knx_info[2])+"/"+action+"/"+str(data))
 
         return "RETURN : " + req.text
     elif techno == "zwave":
@@ -70,5 +85,5 @@ def action(name,action):
         return "error"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__" :
     app.run(host="0.0.0.0")
