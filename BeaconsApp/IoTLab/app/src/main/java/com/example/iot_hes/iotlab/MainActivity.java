@@ -80,17 +80,11 @@ public class MainActivity extends AppCompatActivity {
         Map<String, List<String>> placesByBeacons = new HashMap<>();
         placesByBeacons.put("23899:517", new ArrayList<String>() {{
             add("beacon 3 ");
-            // read as: "Heavenly Sandwiches" is closest
-            // to the beacon with major 22504 and minor 48827
-            //add("Green & Green Salads");
-            // "Green & Green Salads" is the next closest
-            //add("Mini Panini");
-            // "Mini Panini" is the furthest away
+
         }});
         placesByBeacons.put("23899:48851", new ArrayList<String>() {{
             add("beacon 13");
-            //add("Green & Green Salads");
-            //add("Heavenly Sandwiches");
+
         }});
         PLACES_BY_BEACONS = Collections.unmodifiableMap(placesByBeacons);
     }
