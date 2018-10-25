@@ -1,8 +1,8 @@
 package com.example.larrieu_martinez.iot_lab_1
 
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.*
 import com.android.volley.Request
 import com.android.volley.RequestQueue
@@ -15,14 +15,19 @@ import com.android.volley.toolbox.StringRequest
 
 class MainActivity : AppCompatActivity() {
 
+    val server_ip : String = "10.128.25.254"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val server_ip = "10.128.25.254"
 
+
+
+        ////////////
         //TODO : beacons modify room var. If nothing -> room = 0
-        var room = 0
+        var room = 1
+        ////////////
 
 
         val textview = findViewById<TextView>(R.id.room_title)
@@ -40,20 +45,24 @@ class MainActivity : AppCompatActivity() {
         mRequestQueue.start()
 
         val url = "http://"+ server_ip +":5000/devices/" + room.toString()
-        Toast.makeText(this@MainActivity, url, Toast.LENGTH_LONG).show()
-
 
         //String Request initialized
         var mStringRequest = StringRequest(Request.Method.GET, url, object : Response.Listener<String> {
             override fun onResponse(response: String) {
-                Toast.makeText(this@MainActivity, response, Toast.LENGTH_LONG).show()
 
-                //list View ...
                 var list_devices = response.split(",")
                 var listview = findViewById<ListView>(R.id.list_devices)
 
                 var sAdapter = ArrayAdapter<String>(this@MainActivity, android.R.layout.simple_list_item_1, list_devices)
                 listview.adapter = sAdapter
+
+                listview.setOnItemClickListener { parent, view, position, id ->
+                    //Toast.makeText(this, "Position Clicked:"+" "+position, Toast.LENGTH_LONG).show()
+                    var intent = Intent(this@MainActivity,ActionsActivity::class.java)
+                    intent.putExtra("EXTRA_POSITION",list_devices[position])
+                    startActivity(intent)
+                    finish()
+                }
             }
         }, object : Response.ErrorListener {
             override fun onErrorResponse(error: VolleyError) {
@@ -62,7 +71,5 @@ class MainActivity : AppCompatActivity() {
         })
 
         mRequestQueue.add(mStringRequest)
-
-
     }
 }
