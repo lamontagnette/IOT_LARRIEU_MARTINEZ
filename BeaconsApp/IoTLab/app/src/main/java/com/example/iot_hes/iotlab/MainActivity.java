@@ -21,7 +21,11 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -46,10 +50,14 @@ public class MainActivity extends AppCompatActivity {
     //     --> See Estimote documentation:  https://github.com/Estimote/Android-SDK
     // - Set the PositionText with the Room name
     // - Implement the "OnClick" functions for LightButton, StoreButton and RadiatorButton
+    private static final String TAG2 = MainActivity.class.getName();
+    private RequestQueue mRequestQueue;
+    private StringRequest mStringRequest;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        mRequestQueue = Volley.newRequestQueue(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -108,49 +116,36 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-
         StoreButton.setOnClickListener(new View.OnClickListener() {
 
+
             public void onClick(View v) {
-                String url = "http://192.168.1.109/127.1.0.1/4/2/blind_control/"+ Percentage.getText();
 
-                // Request a string response from the provided URL.
-                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                        new Response.Listener<String>() {
+                // TODO Send HTTP Request to command radiator
+                //RequestQueue initialized
 
-                            @Override
-                            public void onResponse(String response) {
-                                // Display the first 500 characters of the response string.
-                                Toast toast = Toast.makeText(getApplicationContext(),
-                                        response.substring(0,500),
-                                        Toast.LENGTH_SHORT);
+                String url = "http://10.128.25.62:5000/127.1.0.1/4/2/blind_control/"+ Percentage.getText();
 
-                                toast.show();
-                            }
-                        }, new Response.ErrorListener() {
+                //String Request initialized
+                mStringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        Toast.makeText(getApplicationContext(),"Response :" + response.toString(), Toast.LENGTH_LONG).show();//display the response on screen
+
+                    }
+                }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Toast toast = Toast.makeText(getApplicationContext(),
-                                error.toString(),
-                                Toast.LENGTH_SHORT);
 
-                        toast.show();
+                        Log.i(TAG,"Error :" + error.toString());
                     }
                 });
 
-                stringRequest.setTag(TAG);
-
-                // Add the request to the RequestQueue.
-                mRequestQueue.add(stringRequest);
-
-                Toast toast = Toast.makeText(getApplicationContext(),
-                        "OK",
-                        Toast.LENGTH_LONG);
-
-                toast.show();
+                mRequestQueue.add(mStringRequest);
             }
-        });
 
+        });
 
 
         RadiatorButton.setOnClickListener(new View.OnClickListener() {
@@ -158,8 +153,29 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 // TODO Send HTTP Request to command radiator
-                Log.d("IoTLab", Percentage.getText().toString());
+                //RequestQueue initialized
+
+                String url = "http://10.128.25.62:5000/127.1.0.3/4/2/valve_control/"+ Percentage.getText();
+
+                //String Request initialized
+                mStringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        Toast.makeText(getApplicationContext(),"Response :" + response.toString(), Toast.LENGTH_LONG).show();//display the response on screen
+
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                        Log.i(TAG,"Error :" + error.toString());
+                    }
+                });
+
+                mRequestQueue.add(mStringRequest);
             }
+
         });
 
 
@@ -181,7 +197,33 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void sendAndRequestResponse() {
+
+        //RequestQueue initialized
+        RequestQueue mRequestQueue;
+        mRequestQueue = Volley.newRequestQueue(this);
+        String url = "http://10.128.25.62:5000/127.1.0.1/4/2/blind_close";
+
+        //String Request initialized
+        mStringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+                Toast.makeText(getApplicationContext(),"Response :" + response.toString(), Toast.LENGTH_LONG).show();//display the response on screen
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+                Log.i(TAG,"Error :" + error.toString());
+            }
+        });
+
+        mRequestQueue.add(mStringRequest);
+    }
 }
+
 
 // This class is used to filter input, you won't be using it.
 
@@ -211,4 +253,8 @@ class InputFilterMinMax implements InputFilter {
     private boolean isInRange(int a, int b, int c) {
         return b > a ? c >= a && c <= b : c >= b && c <= a;
     }
+
+
+
 }
+
