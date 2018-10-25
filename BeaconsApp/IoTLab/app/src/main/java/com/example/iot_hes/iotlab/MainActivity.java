@@ -1,5 +1,10 @@
 package com.example.iot_hes.iotlab;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputFilter;
@@ -25,7 +30,21 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import com.estimote.coresdk.common.config.EstimoteSDK;
+import com.estimote.coresdk.common.requirements.SystemRequirementsChecker;
+import com.estimote.coresdk.observation.region.beacon.BeaconRegion;
+import com.estimote.coresdk.recognition.packets.Beacon;
+import com.estimote.coresdk.recognition.packets.ConfigurableDevice;
+import com.estimote.coresdk.service.BeaconManager;
+
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -53,6 +72,31 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG2 = MainActivity.class.getName();
     private RequestQueue mRequestQueue;
     private StringRequest mStringRequest;
+    private BeaconManager beaconManager;
+    private BeaconRegion region;
+    private static final Map<String, List<String>> PLACES_BY_BEACONS;
+
+    static {
+        Map<String, List<String>> placesByBeacons = new HashMap<>();
+        placesByBeacons.put("23899:517", new ArrayList<String>() {{
+            add("beacon 3 ");
+            // read as: "Heavenly Sandwiches" is closest
+            // to the beacon with major 22504 and minor 48827
+            //add("Green & Green Salads");
+            // "Green & Green Salads" is the next closest
+            //add("Mini Panini");
+            // "Mini Panini" is the furthest away
+        }});
+        placesByBeacons.put("23899:48851", new ArrayList<String>() {{
+            add("beacon 13");
+            //add("Green & Green Salads");
+            //add("Heavenly Sandwiches");
+        }});
+        PLACES_BY_BEACONS = Collections.unmodifiableMap(placesByBeacons);
+    }
+
+
+
 
 
     @Override
@@ -79,6 +123,50 @@ public class MainActivity extends AppCompatActivity {
         Network network = new BasicNetwork(new HurlStack());
         final RequestQueue mRequestQueue = new RequestQueue(cache, network);
         mRequestQueue.start();
+
+        beaconManager = new BeaconManager(this);
+        region = new BeaconRegion("ranged region",
+                UUID.fromString("b9407f30-f5f8-466e-aff9-25556b57fe6d"), null, null);
+
+
+
+
+        /*beaconManager.setMonitoringListener(new BeaconManager.BeaconMonitoringListener() {
+            @Override
+            public void onEnteredRegion(BeaconRegion region, List<Beacon> beacons) {
+                showNotification(
+                        "Your gate closes in 47 minutes.",
+                        "Current security wait time is 15 minutes, "
+                                + "and it's a 5 minute walk from security to the gate. "
+                                + "Looks like you've got plenty of time!");
+            }
+            @Override
+            public void onExitedRegion(BeaconRegion region) {
+                // could add an "exit" notification too if you want (-:
+            }
+        });*/
+
+        beaconManager.setRangingListener(new BeaconManager.BeaconRangingListener() {
+            @Override
+            public void onBeaconsDiscovered(BeaconRegion region, List<Beacon> list) {
+                if (!list.isEmpty()) {
+                    Beacon nearestBeacon = list.get(0);
+                    List<String> places = placesNearBeacon(nearestBeacon);
+                    // TODO: update the UI here
+                    Log.d("Beacon", "le plus proche: " + places);
+                }
+            }
+        });
+
+        /*beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
+            @Override
+            public void onServiceReady() {
+                beaconManager.startMonitoring(new BeaconRegion(
+                        "monitored region",
+                        UUID.fromString("b9407f30-f5f8-466e-aff9-25556b57fe6d"),
+                        23899, 517));
+            }
+        });*/
 
 
 
@@ -179,7 +267,14 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+
+
+
+
+
     }
+
+
 
 
     // You will be using "OnResume" and "OnPause" functions to resume and pause Beacons ranging (scanning)
@@ -187,7 +282,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        SystemRequirementsChecker.checkWithDefaultDialogs(this);
 
+        beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
+            @Override
+            public void onServiceReady() {
+                beaconManager.startRanging(region);
+            }
+
+        });
     }
 
 
@@ -222,6 +325,35 @@ public class MainActivity extends AppCompatActivity {
 
         mRequestQueue.add(mStringRequest);
     }
+
+    public void showNotification(String title, String message) {
+        Intent notifyIntent = new Intent(this, MainActivity.class);
+        notifyIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivities(this, 0,
+                new Intent[] { notifyIntent }, PendingIntent.FLAG_UPDATE_CURRENT);
+        Notification notification = new Notification.Builder(this)
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent)
+                .build();
+        notification.defaults |= Notification.DEFAULT_SOUND;
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(1, notification);
+    }
+
+
+    private List<String> placesNearBeacon(Beacon beacon) {
+        String beaconKey = String.format("%d:%d", beacon.getMajor(), beacon.getMinor());
+        if (PLACES_BY_BEACONS.containsKey(beaconKey)) {
+            return PLACES_BY_BEACONS.get(beaconKey);
+        }
+        return Collections.emptyList();
+    }
+
+
 }
 
 
