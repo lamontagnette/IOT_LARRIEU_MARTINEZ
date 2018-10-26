@@ -1,22 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".MainActivity">
+    android:orientation="vertical">
 
     <TextView
-        android:id="@+id/room_title"
+        android:id="@+id/device_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:textSize="20dp"
-        android:layout_margin="20dp"/>
-    
+        android:layout_margin="20dp"
+        android:gravity="center"
+        android:textSize="20dp" />
+
     <ListView
-        android:id="@+id/list_devices"
+        android:id="@+id/list_actions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"></ListView>
 

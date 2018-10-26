@@ -1,5 +1,6 @@
 from flask import Flask
 import sqlite3
+import requests
 
 ip_knx_server = "127.0.0.1"
 port_knx_server = 5000
@@ -17,25 +18,25 @@ app = Flask(__name__)
 
 @app.route("/")
 def help_page():
-    return """HELP
-USE REST STYLE :
-/ip/floor/bloc/action(/data)
-"""
+    return """OK"""
 
 @app.route("/devices/<int:room>")
 def get_devices(room):
-    conn = sqlite3.connect('iot.db')
-    c = conn.cursor()
-
-    devices_iterator = c.execute("SELECT name FROM devices WHERE room="+str(int(room)))
-
-    if devices_iterator == None :
-        return "unknown room"
+    if room == 0 :
+        return ""
     else :
-        r = next(devices_iterator)[0]
-        for row in devices_iterator:
-            r += "," + row[0]
-        return r
+        conn = sqlite3.connect('iot.db')
+        c = conn.cursor()
+
+        devices_iterator = c.execute("SELECT name FROM devices WHERE room="+str(int(room)))
+
+        if devices_iterator == None :
+            return "unknown room"
+        else :
+            r = next(devices_iterator)[0]
+            for row in devices_iterator:
+                r += "," + row[0]
+            return r
 
 @app.route("/actions/<name>")
 def get_actions(name):
@@ -50,6 +51,42 @@ def get_actions(name):
     else :
         return actions[device_type]
 
+@app.route("/<string:name>/<string:action>")
+def action(name,action):
+    conn = sqlite3.connect('iot.db')
+    c = conn.cursor()
 
-if __name__ == "__main__":
+    techno = next(c.execute('SELECT techno FROM devices WHERE name="'+name+'"'))[0]
+
+    if techno == "knx":
+        knx_info = next(c.execute('SELECT ip,floor,bloc FROM knx WHERE name="'+name+'"'))
+
+        req = requests.get("http://"+ip_knx_server+":5000/"+knx_info[0]+"/"+str(knx_info[1])+"/"+str(knx_info[2])+"/"+action)
+
+        return "RETURN : " + req.text
+    elif techno == "zwave":
+        return "zwave"
+    else :
+        return "error"
+
+@app.route("/<string:name>/<string:action>/<data>")
+def action_data(name,action,data):
+    conn = sqlite3.connect('iot.db')
+    c = conn.cursor()
+
+    techno = next(c.execute('SELECT techno FROM devices WHERE name="'+name+'"'))[0]
+
+    if techno == "knx":
+        knx_info = next(c.execute('SELECT ip,floor,bloc FROM knx WHERE name="'+name+'"'))
+
+        req = requests.get("http://"+ip_knx_server+":5000/"+knx_info[0]+"/"+str(knx_info[1])+"/"+str(knx_info[2])+"/"+action+"/"+str(data))
+
+        return "RETURN : " + req.text
+    elif techno == "zwave":
+        return "zwave"
+    else :
+        return "error"
+
+
+if __name__ == "__main__" :
     app.run(host="0.0.0.0")
