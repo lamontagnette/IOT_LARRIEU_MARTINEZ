@@ -69,8 +69,11 @@ def action(name,action):
     else :
         return "error"
 
-@app.route("/<string:name>/<string:action>/<data>")
+@app.route("/<string:name>/<string:action>/<int:data>")
 def action_data(name,action,data):
+    if data < 0 or data >255 :
+        return "incorrect value"
+    
     conn = sqlite3.connect('iot.db')
     c = conn.cursor()
 

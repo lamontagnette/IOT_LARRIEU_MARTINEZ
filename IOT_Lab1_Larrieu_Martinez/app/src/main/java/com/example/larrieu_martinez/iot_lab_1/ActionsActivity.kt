@@ -52,11 +52,10 @@ class ActionsActivity : AppCompatActivity(){
                     //Toast.makeText(this, "Position Clicked:"+" "+position, Toast.LENGTH_LONG).show()
                     if (list_actions[position].contains("control"))
                     {
-                        val extra = ArrayList<String>()
-                        extra.add(device_name)
-                        extra.add(list_actions[position])
+                        val extra = arrayOf(device_name,list_actions[position])
+
                         var intent = Intent(this@ActionsActivity,DataActivity::class.java)
-                        intent.putExtra("EXTRA_POSITION",extra)
+                        intent.putExtra("EXTRA_DATA",extra)
                         startActivity(intent)
                         finish()
                     }
