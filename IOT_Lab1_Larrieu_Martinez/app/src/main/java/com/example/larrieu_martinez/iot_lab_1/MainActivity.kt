@@ -3,6 +3,7 @@ package com.example.larrieu_martinez.iot_lab_1
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.*
 import com.android.volley.Request
 import com.android.volley.RequestQueue
@@ -15,14 +16,11 @@ import com.android.volley.toolbox.StringRequest
 
 class MainActivity : AppCompatActivity() {
 
-    val server_ip : String = "10.128.25.254"
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-
-
 
         ////////////
         //TODO : beacons modify room var. If nothing -> room = 0
@@ -30,13 +28,19 @@ class MainActivity : AppCompatActivity() {
         ////////////
 
 
+        server_request_devices(room)
+
+    }
+
+    fun server_request_devices(room : Int){
+
+        val url = "http://"+ resources.getString(R.string.server_ip) +":5000/devices/" + room.toString()
+
         val textview = findViewById<TextView>(R.id.room_title)
 
-        if (room == 0){
-            textview.text = "Vous n'êtes pas à proximité d'un Beacons"
-        }
-        else {
-            textview.text = "Vous êtes dans la pièce " + room.toString()
+        when(room){ // TODO : IN beacons func -> text = server inecc.. here
+            0 -> textview.text = "Vous n'êtes pas à proximité d'un Beacons"
+            else -> textview.text = "Vous êtes dans la pièce " + room.toString()
         }
 
         val cache = DiskBasedCache(cacheDir, 1024 * 1024)
@@ -44,9 +48,6 @@ class MainActivity : AppCompatActivity() {
         val mRequestQueue = RequestQueue(cache, network)
         mRequestQueue.start()
 
-        val url = "http://"+ server_ip +":5000/devices/" + room.toString()
-
-        //String Request initialized
         var mStringRequest = StringRequest(Request.Method.GET, url, object : Response.Listener<String> {
             override fun onResponse(response: String) {
 
@@ -67,9 +68,12 @@ class MainActivity : AppCompatActivity() {
         }, object : Response.ErrorListener {
             override fun onErrorResponse(error: VolleyError) {
                 Toast.makeText(this@MainActivity, error.toString(), Toast.LENGTH_LONG).show()
+                Thread.sleep(500)
+                server_request_devices(room)
             }
         })
 
         mRequestQueue.add(mStringRequest)
+
     }
 }

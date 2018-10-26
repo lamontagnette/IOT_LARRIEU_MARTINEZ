@@ -19,11 +19,11 @@ import com.android.volley.toolbox.StringRequest
 
 class ActionsActivity : AppCompatActivity(){
 
-    val server_ip : String = "10.128.25.254"
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.actions_layout)
+
+        val server_ip : String = resources.getString(R.string.server_ip)
 
         var device_name = intent.getStringExtra("EXTRA_POSITION")
 
