@@ -16,6 +16,8 @@ import com.android.volley.toolbox.StringRequest
 
 class DataActivity : AppCompatActivity(){
 
+    var device_name : String = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.data_layout)
@@ -23,8 +25,11 @@ class DataActivity : AppCompatActivity(){
 
         val info_array : Array<String> = intent.getStringArrayExtra("EXTRA_DATA")
 
-        val device_name = info_array[0]
+        device_name = info_array[0]
         val action = info_array[1]
+
+        val data_title = findViewById<TextView>(R.id.data_title)
+        data_title.text = device_name + " : " + action
 
         val server_ip : String = resources.getString(R.string.server_ip)
 
@@ -55,7 +60,8 @@ class DataActivity : AppCompatActivity(){
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         return if (keyCode == KeyEvent.KEYCODE_BACK) {
-            val intent = Intent(this,MainActivity::class.java)
+            val intent = Intent(this,ActionsActivity::class.java)
+            intent.putExtra("EXTRA_POSITION",device_name)
             startActivity(intent)
             finish()
             true

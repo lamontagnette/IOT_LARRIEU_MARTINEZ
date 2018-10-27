@@ -10,14 +10,16 @@
         android:layout_height="wrap_content"
         android:text="TextView"
         android:layout_gravity="center_horizontal"
-        android:layout_margin="20dp"/>
+        android:layout_margin="20dp"
+        android:textSize="20dp"/>
 
     <EditText
         android:id="@+id/data"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_margin="20dp"
+        android:layout_marginVertical="20dp"
+        android:layout_marginHorizontal="80dp"
         android:ems="10"
         android:inputType="number"
         android:text="128"
