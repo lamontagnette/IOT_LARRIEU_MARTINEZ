@@ -6,13 +6,14 @@ ip_knx_server = "127.0.0.1"
 port_knx_server = 5000
 
 # TODO : PUT CORRECT INFO
-ip_zwave_server = "127.0.0.1"
-port_zwave_server = 80
+ip_zwave_server = "192.168.1.2"
+port_zwave_server = 5000
 
 # TODO : COMPLET ZW
 actions = {
     "blind" : "blind_open,blind_close,blind_control,blind_read",
-    "valve" :  "valve_control,valve_read"
+    "valve" :  "valve_control,valve_read",
+    "light" : "light_control"
 }
 
 app = Flask(__name__)
@@ -67,7 +68,10 @@ def action(name,action):
         return "RETURN : " + req.text
     elif techno == "zwave":
         # TODO : COMPLET
-        return "zwave"
+        z_wave_info = next(c.execute('SELECT adresse FROM zwave WHERE name="'+name+'"'))
+        req = requests.get("http://" + ip_zwave_server + ":5000/dimmers" + str(z_wave_info[0]) + "/"  + action)
+
+        return "Return : " + req.text
     else :
         return "error"
 
@@ -89,7 +93,10 @@ def action_data(name,action,data):
         return "RETURN : " + req.text
     elif techno == "zwave":
         # TODO : COMPLET
-        return "zwave"
+        z_wave_info = next(c.execute('SELECT adresse FROM zwave WHERE name="' + name + '"'))
+        req = requests.get("http://" + ip_zwave_server + ":5000/dimmers" + str(z_wave_info[0]) + "/" + str(data))
+
+        return "Return : " + req.text
     else :
         return "error"
 
