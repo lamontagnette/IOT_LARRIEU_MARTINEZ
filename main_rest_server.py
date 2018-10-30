@@ -16,6 +16,7 @@ actions = {
     "light" : "light_control"
 }
 
+
 app = Flask(__name__)
 
 @app.route("/")
@@ -30,50 +31,74 @@ def get_devices(room):
         conn = sqlite3.connect('iot.db')
         c = conn.cursor()
 
-        devices_iterator = c.execute("SELECT name FROM devices WHERE room="+str(int(room)))
+        # Try request to db
+        try :
 
-        if devices_iterator == None :
-            return "unknown room"
-        else :
-            r = next(devices_iterator)[0]
-            for row in devices_iterator:
-                r += "," + row[0]
-            return r
+            devices_iterator = c.execute("SELECT name FROM devices WHERE room="+str(int(room)))
+
+            if devices_iterator == None :
+                return "unknown room"
+            else :
+                r = next(devices_iterator)[0]
+                for row in devices_iterator:
+                    r += "," + row[0]
+                return r
+            
+        # If errors in db request
+    except :
+        return "request error"
 
 @app.route("/actions/<name>")
 def get_actions(name):
     conn = sqlite3.connect('iot.db')
     c = conn.cursor()
 
-    device_type = next(c.execute('SELECT type FROM devices WHERE name="'+str(name)+'"'))[0]
+    # Try request to db
+    try :
 
-    print(device_type)
-    if device_type == None :
-        return "device not found"
-    else :
-        return actions[device_type]
+        device_type = next(c.execute('SELECT type FROM devices WHERE name="'+str(name)+'"'))[0]
+
+        print(device_type)
+        if device_type == None :
+            return "device not found"
+        else :
+            return actions[device_type]
+        
+    # If errors in db request
+    except :
+        return "request error"
 
 @app.route("/<string:name>/<string:action>")
 def action(name,action):
     conn = sqlite3.connect('iot.db')
     c = conn.cursor()
 
-    techno = next(c.execute('SELECT techno FROM devices WHERE name="'+name+'"'))[0]
+    # Try request to db
+    try :
 
-    if techno == "knx":
-        knx_info = next(c.execute('SELECT ip,floor,bloc FROM knx WHERE name="'+name+'"'))
+        techno = next(c.execute('SELECT techno FROM devices WHERE name="'+name+'"'))[0]
 
-        req = requests.get("http://"+ip_knx_server+":5000/"+knx_info[0]+"/"+str(knx_info[1])+"/"+str(knx_info[2])+"/"+action)
+        if techno == "knx":
+            knx_info = next(c.execute('SELECT ip,floor,bloc FROM knx WHERE name="'+name+'"'))
 
-        return "RETURN : " + req.text
-    elif techno == "zwave":
-        # TODO : COMPLET
-        z_wave_info = next(c.execute('SELECT adresse FROM zwave WHERE name="'+name+'"'))
-        req = requests.get("http://" + ip_zwave_server + ":5000/dimmers" + str(z_wave_info[0]) + "/"  + action)
+            req = requests.get("http://"+ip_knx_server+":5000/"+knx_info[0]+"/"+str(knx_info[1])+"/"+str(knx_info[2])+"/"+action)
 
-        return "Return : " + req.text
-    else :
-        return "error"
+            return "RETURN : " + req.text
+        
+        elif techno == "zwave":
+            # TODO : COMPLET
+            z_wave_info = next(c.execute('SELECT adresse FROM zwave WHERE name="'+name+'"'))
+            req = requests.get("http://" + ip_zwave_server + ":5000/dimmers" + str(z_wave_info[0]) + "/"  + action)
+
+            return "Return : " + req.text
+        
+        else :
+            return "error"
+        
+    # If errors in db request
+    except :
+        return "request error"
+        
 
 @app.route("/<string:name>/<string:action>/<int:data>")
 def action_data(name,action,data):
@@ -83,22 +108,29 @@ def action_data(name,action,data):
     conn = sqlite3.connect('iot.db')
     c = conn.cursor()
 
-    techno = next(c.execute('SELECT techno FROM devices WHERE name="'+name+'"'))[0]
+    # Try request to db
+    try :
 
-    if techno == "knx":
-        knx_info = next(c.execute('SELECT ip,floor,bloc FROM knx WHERE name="'+name+'"'))
+        techno = next(c.execute('SELECT techno FROM devices WHERE name="'+name+'"'))[0]
 
-        req = requests.get("http://"+ip_knx_server+":5000/"+knx_info[0]+"/"+str(knx_info[1])+"/"+str(knx_info[2])+"/"+action+"/"+str(data))
+        if techno == "knx":
+            knx_info = next(c.execute('SELECT ip,floor,bloc FROM knx WHERE name="'+name+'"'))
 
-        return "RETURN : " + req.text
-    elif techno == "zwave":
-        # TODO : COMPLET
-        z_wave_info = next(c.execute('SELECT adresse FROM zwave WHERE name="' + name + '"'))
-        req = requests.get("http://" + ip_zwave_server + ":5000/dimmers" + str(z_wave_info[0]) + "/" + str(data))
+            req = requests.get("http://"+ip_knx_server+":5000/"+knx_info[0]+"/"+str(knx_info[1])+"/"+str(knx_info[2])+"/"+action+"/"+str(data))
 
-        return "Return : " + req.text
-    else :
-        return "error"
+            return "RETURN : " + req.text
+        elif techno == "zwave":
+            # TODO : COMPLET
+            z_wave_info = next(c.execute('SELECT adresse FROM zwave WHERE name="' + name + '"'))
+            req = requests.get("http://" + ip_zwave_server + ":5000/dimmers" + str(z_wave_info[0]) + "/" + str(data))
+
+            return "Return : " + req.text
+        else :
+            return "error"
+        
+    # If errors in db request
+    except :
+        return "request error"
 
 
 if __name__ == "__main__" :
