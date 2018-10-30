@@ -13,7 +13,7 @@ port_zwave_server = 5000
 actions = {
     "blind" : "blind_open,blind_close,blind_control,blind_read",
     "valve" :  "valve_control,valve_read",
-    "light" : "light_control"
+    "light" : "light_level"
 }
 
 app = Flask(__name__)
@@ -68,9 +68,8 @@ def action(name,action):
         return "RETURN : " + req.text
     elif techno == "zwave":
         # TODO : COMPLET
-        z_wave_info = next(c.execute('SELECT adresse FROM zwave WHERE name="'+name+'"'))
-        req = requests.get("http://" + ip_zwave_server + ":5000/dimmers" + str(z_wave_info[0]) + "/"  + action)
-
+        z_wave_info = next(c.execute('SELECT url FROM zwave WHERE name="'+name+'"'))
+        req = requests.get("http://" + ip_zwave_server + ":5000" + str(z_wave_info[0])
         return "Return : " + req.text
     else :
         return "error"
