@@ -81,17 +81,12 @@ def action(name,action):
         if techno == "knx":
             knx_info = next(c.execute('SELECT ip,floor,bloc FROM knx WHERE name="'+name+'"'))
 
-        return "RETURN : " + req.text
-    elif techno == "zwave":
-        # TODO : COMPLET
-        z_wave_info = next(c.execute('SELECT url FROM zwave WHERE name="'+name+'"'))
-        req = requests.get("http://" + ip_zwave_server + ":5000" + str(z_wave_info[0])
-        return "Return : " + req.text
-    else :
-        return "error"
-
+            return "RETURN : " + req.text
+        elif techno == "zwave":
+            # TODO : COMPLET
+            z_wave_info = next(c.execute('SELECT url FROM zwave WHERE name="'+name+'"'))
+            req = requests.get("http://" + ip_zwave_server + ":5000" + str(z_wave_info[0]))
             return "Return : " + req.text
-        
         else :
             return "error"
         
