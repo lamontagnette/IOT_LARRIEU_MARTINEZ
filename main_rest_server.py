@@ -45,8 +45,8 @@ def get_devices(room):
                 return r
             
         # If errors in db request
-    except :
-        return "request error"
+        except :
+            return "request error"
 
 @app.route("/actions/<name>")
 def get_actions(name):
