@@ -11,10 +11,10 @@ port_zwave_server = 5000
 
 # TODO : COMPLET ZW
 actions = {
-    "blind" : "blind_open,blind_close,blind_control,blind_read",
-    "valve" :  "valve_control,valve_read",
-    "light" : "get_dimmer_level",
-    "sensor": "get_temperature, get_luminance, get_humidity,get_all_measures_sensor"
+    "blind" : "blind_open,blind_close,blind_control,blind_read" ,
+    "valve" :"valve_control,valve_read" ,
+    "light" : "get_dimmer_level" ,
+    "sensor": "get_temperature,get_luminance,get_humidity,get_all_measures_sensor"
 }
 
 
