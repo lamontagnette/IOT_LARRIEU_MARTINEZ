@@ -10,7 +10,7 @@ actions = {
     "blind" : "blind_open,blind_close,blind_control,blind_read" ,
     "valve" :"valve_control,valve_read" ,
     "light" : "get_dimmer_level" ,
-    "sensor": "get_temperature,get_luminance,get_humidity,get_all_measures_sensor"
+    "sensor": "get_temperature,get_luminance,get_humidity,get_all_measures"
 }
 
 
@@ -82,9 +82,17 @@ def action(name,action):
             return "RETURN : " + req.text
         elif techno == "zwave":
             # TODO : COMPLET
-            z_wave_info = next(c.execute('SELECT node FROM zwave WHERE name="'+name+'"'))
-            req = requests.get("http://" + ip_zwave_server + ":5000" +"/"+ str(z_wave_info[0]) +"/"+ action)
-            return "Return : " + req.text
+            device_type = next(c.execute('SELECT type FROM devices WHERE name="'+str(name)+'"'))[0]
+
+            if device_type == "light":
+                z_wave_info = next(c.execute('SELECT node FROM zwave WHERE name="'+name+'"'))
+                req = requests.get("http://" + ip_zwave_server + ":5000" +"/dimmers/"+ str(z_wave_info[0]) +"/"+ action)
+                return "Return : " + req.text
+            else :
+                z_wave_info = next(c.execute('SELECT node FROM zwave WHERE name="'+name+'"'))
+                req = requests.get("http://" + ip_zwave_server + ":5000" +"/sensors/"+ str(z_wave_info[0]) +"/"+ action)
+                return "Return : " + req.text
+                
         else :
             return "error"
         
@@ -118,10 +126,10 @@ def action_data(name,action,data):
 
             if device_type == "light":
                 z_wave_info = next(c.execute('SELECT adresse FROM zwave WHERE name="' + name + '"'))
-                req = requests.post("http://" + ip_zwave_server + ":5000/sensors/"+ str(z_wave_info[0]) + "/" + str(data))
+                req = requests.post("http://" + ip_zwave_server + ":5000/dimmers/"+ str(z_wave_info[0]) + "/" + str(data))
             else :
                 z_wave_info = next(c.execute('SELECT adresse FROM zwave WHERE name="' + name + '"'))
-                req = requests.post("http://" + ip_zwave_server + ":5000/dimmers/"+ str(z_wave_info[0]) + "/" + str(data))   
+                req = requests.post("http://" + ip_zwave_server + ":5000/sensors/"+ str(z_wave_info[0]) + "/" + str(data))   
 
             return "Return : " + req.text
         else :
