@@ -6,7 +6,7 @@ Pour utiliser l'application il faut préalablement changer l'IP du serveur princ
 
 Et changer, si besoin, les IP des serveurs KNX et Z-WAVE dans le serveur principal (main_rest_server.py).
 
-De plus, il faut affecter les nodes de la partie Z-WAVE de la façon suivante (voir table zwave dans la DB iot.db) :
+De plus, les nodes de la partie Z-WAVE doivent être de la façon suivante (voir table zwave dans la DB iot.db) :
 
 ![zwave_nodes_cap](D:\Documents\HES-SO\cours\iot\git\IOT_LARRIEU_MARTINEZ\zwave_nodes_cap.PNG)
 
