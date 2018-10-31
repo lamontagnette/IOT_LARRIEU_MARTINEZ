@@ -3,13 +3,9 @@ import sqlite3
 import requests
 
 ip_knx_server = "127.0.0.1"
-port_knx_server = 5000
-
-# TODO : PUT CORRECT INFO
 ip_zwave_server = "192.168.1.2"
-port_zwave_server = 5000
 
-# TODO : COMPLET ZW
+
 actions = {
     "blind" : "blind_open,blind_close,blind_control,blind_read" ,
     "valve" :"valve_control,valve_read" ,
