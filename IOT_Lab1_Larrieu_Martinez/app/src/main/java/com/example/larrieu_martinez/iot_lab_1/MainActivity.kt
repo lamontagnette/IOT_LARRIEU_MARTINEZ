@@ -50,8 +50,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             else {
-                room = 0
-                server_request_devices(room)
+                val textview = findViewById<TextView>(R.id.room_title)
+                textview.text = "Pas de beacon à proximité"
             }
         })
     }
@@ -61,11 +61,7 @@ class MainActivity : AppCompatActivity() {
         val url = "http://"+ resources.getString(R.string.server_ip) +":5000/devices/" + room.toString()
 
         val textview = findViewById<TextView>(R.id.room_title)
-
-        when(room){ // TODO : IN beacons func -> text = server inecc.. here
-            0 -> textview.text = "Vous n'êtes pas à proximité d'un Beacons"
-            else -> textview.text = "Vous êtes dans la pièce " + room.toString()
-        }
+        textview.text = "Vous êtes dans la pièce " + room.toString()
 
         val cache = DiskBasedCache(cacheDir, 1024 * 1024)
         val network = BasicNetwork(HurlStack())
@@ -115,7 +111,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun placesNearBeacon(beacon: Beacon): List<String>? {
-        val no_beacon_list = listOf("0")
+        val no_beacon_list = emptyList<String>()
         val beaconKey = String.format("%d:%d", beacon.major, beacon.minor)
         return if (PLACES_BY_BEACONS.containsKey(beaconKey)) {
             PLACES_BY_BEACONS[beaconKey]

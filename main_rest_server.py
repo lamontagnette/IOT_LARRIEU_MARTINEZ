@@ -77,12 +77,13 @@ def action(name,action):
 
         if techno == "knx":
             knx_info = next(c.execute('SELECT ip,floor,bloc FROM knx WHERE name="'+name+'"'))
+            req = requests.get("http://"+ip_knx_server+":5000/"+knx_info[0]+"/"+str(knx_info[1])+"/"+str(knx_info[2])+"/"+action)
 
             return "RETURN : " + req.text
         elif techno == "zwave":
             # TODO : COMPLET
             z_wave_info = next(c.execute('SELECT node FROM zwave WHERE name="'+name+'"'))
-            req = requests.get("http://" + ip_zwave_server + ":5000" + str(z_wave_info[0])) + action
+            req = requests.get("http://" + ip_zwave_server + ":5000" +"/"+ str(z_wave_info[0]) +"/"+ action)
             return "Return : " + req.text
         else :
             return "error"
@@ -113,8 +114,14 @@ def action_data(name,action,data):
             return "RETURN : " + req.text
         elif techno == "zwave":
             # TODO : COMPLET
-            z_wave_info = next(c.execute('SELECT adresse FROM zwave WHERE name="' + name + '"'))
-            req = requests.post("http://" + ip_zwave_server + ":5000/dimmers" + str(z_wave_info[0]) + "/" + str(data))
+            device_type = next(c.execute('SELECT type FROM devices WHERE name="'+str(name)+'"'))[0]
+
+            if device_type == "light":
+                z_wave_info = next(c.execute('SELECT adresse FROM zwave WHERE name="' + name + '"'))
+                req = requests.post("http://" + ip_zwave_server + ":5000/sensors/"+ str(z_wave_info[0]) + "/" + str(data))
+            else :
+                z_wave_info = next(c.execute('SELECT adresse FROM zwave WHERE name="' + name + '"'))
+                req = requests.post("http://" + ip_zwave_server + ":5000/dimmers/"+ str(z_wave_info[0]) + "/" + str(data))   
 
             return "Return : " + req.text
         else :
